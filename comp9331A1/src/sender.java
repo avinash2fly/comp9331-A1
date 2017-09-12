@@ -76,7 +76,7 @@ public class sender {
 		Utils.START_TIME = System.currentTimeMillis(); 
 		Utils.delay = 1000;
 		//ReceiveAck
-		ReceiverAck receiverAck = new ReceiverAck(sender.senderSocket);
+		ReceiverAck receiverAck = new ReceiverAck(sender.senderSocket,sender.ipAddress,sender.port);
 		Thread receiveThread = new Thread(receiverAck);
 		receiveThread.start();
 		
@@ -88,7 +88,7 @@ public class sender {
 			return;
 		}
 		//SendData;
-		Utils.drop = 0.2;
+		Utils.drop = 0.5;
 		Utils.random= new Random();
 		SendFile sendFile = new SendFile(sender.senderSocket,file , 4, 10, sender.ipAddress, sender.port);
 		Thread sendThread = new Thread(sendFile);

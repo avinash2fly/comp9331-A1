@@ -84,7 +84,7 @@ public class SendFile implements Runnable{
         	 	cbuf = new char[dataSize];
         	 	//socket.send(dataPacket);
         	 	while(Utils.senderMap.size()==window ) {
-        	 		//Utils.sendThred = Thread.currentThread();
+        	 		Utils.sendThred = Thread.currentThread();
         	 		//System.out.println("Someone notified");
         	 		Thread.sleep(100L);
         	 		//System.out.println(Utils.senderMap.size());

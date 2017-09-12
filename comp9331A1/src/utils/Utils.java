@@ -12,6 +12,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -37,7 +38,7 @@ public class Utils {
 	public static Random random  = null;
 	public static int delay;
 	public static int sync;
-	
+	public static ArrayList<Timer> timers = new ArrayList<Timer>();
 	
 	
 	public DatagramSocket getDatagramSocket(int timeout) throws SocketException {
@@ -114,6 +115,7 @@ public class Utils {
 		    		timer.schedule(task, delay);
 		    else
 		    		timer.schedule(task2, delay);
+		    timers.add(timer);
 		//}
 	}
 	static public synchronized void standardPrint(String process, long time_ellapsed, String packetType, int sync_no, int bytesSent, int ack_no){
@@ -162,6 +164,7 @@ public class Utils {
 		     
 		    //long delay = 2000L;
 		    timer.schedule(task, delay);
+		    timers.add(timer);
 		//}
 	}
 	
