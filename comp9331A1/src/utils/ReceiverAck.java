@@ -59,7 +59,7 @@ public class ReceiverAck implements Runnable {
 			int seq_no = dataPacket.getHeader().getSequence();
 			//int byteSent = dataPacket.getData().getDataByte().length;
 			int ack_no  =dataPacket.getHeader().getAck();
-			Utils.receiveMap.put(0, dataPacket);
+			Utils.lastPacket =  dataPacket;
 			if(lastAck!=dataPacket.getHeader().getAck())
 			{
 				lastAck = dataPacket.getHeader().getAck();
@@ -67,11 +67,12 @@ public class ReceiverAck implements Runnable {
 			}
 			else {
 				ackCount++;
+				Utils.duplicateAck++;
 			}
 			Utils.standardPrint("rcv", time_ellapsed, packetType, seq_no, 0, ack_no);
-			
 			if(dataPacket.getHeader().getFlag()==PacketType.ACK) {
 				int ack = dataPacket.getHeader().getAck();
+				try {
 				synchronized (Utils.senderMap) {
 					Iterator<Entry<Integer, Packet>> it = Utils.senderMap.entrySet().iterator();
 					while (it.hasNext())
@@ -82,6 +83,10 @@ public class ReceiverAck implements Runnable {
 						}
 					}
 					
+				}
+				}
+				catch (Exception e) {
+					// TODO: handle exception
 				}
 			}
 			else if (dataPacket.getHeader().getFlag()==PacketType.SYN_ACK) {
@@ -104,6 +109,7 @@ public class ReceiverAck implements Runnable {
 	
 	private void removeTimerAndReSend(int ack) throws IOException, ClassNotFoundException {
 		// TODO Auto-generated method stub
+		try {
 		synchronized (Utils.timers) {
 			for(Timer time : Utils.timers) {
 				time.cancel();
@@ -115,8 +121,9 @@ public class ReceiverAck implements Runnable {
 				it.next();
 				it.remove();
 			}
-			
 		}
+			
+		
 		synchronized (Utils.senderMap) {
 			Iterator<Entry<Integer, Packet>> it = Utils.senderMap.entrySet().iterator();
 			while (it.hasNext())
@@ -129,6 +136,10 @@ public class ReceiverAck implements Runnable {
 			}
 			
 		}
+		}
+		catch(Exception e) {
+			
+		}
 
 	}
 	
@@ -137,6 +148,7 @@ public class ReceiverAck implements Runnable {
 		// TODO Auto-generated method stub
 		try {
 			receive();
+			System.out.println("Receive done");
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -42,6 +42,8 @@ public class receiver {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				if(!isBreak && dataPacket.getHeader().getFlag()==PacketType.ACK)
+					continue;
 				int dataSize;
 				if(dataPacket.getData()!=null)
 					dataSize = dataPacket.getData().getDataByte().length;
@@ -70,6 +72,7 @@ public class receiver {
 				nextSeq= receiverMap.lastEntry().getKey();
 				if(dataPacket.getData()!=null)
 				System.out.println("Student object received = "+dataPacket.getData().getData());
+				
 				if(dataPacket.getHeader().getFlag()==PacketType.FIN)
 					isBreak = true;
 				else if(isBreak && dataPacket.getHeader().getFlag()==PacketType.ACK)
@@ -99,7 +102,7 @@ public class receiver {
 
 				Entry<Integer, Packet> item = it.next();
 				if(item.getValue().getHeader().getFlag()==PacketType.DATA) {
-					System.out.println(item.getValue().getData().getData());
+					//System.out.println(item.getValue().getData().getData());
 					bw.write(item.getValue().getData().getData());
 				}
 			}

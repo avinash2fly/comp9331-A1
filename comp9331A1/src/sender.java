@@ -1,4 +1,6 @@
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -49,8 +51,8 @@ public class sender {
 			if(type==PacketType.ACK)
 				handshake=true;
 			Packet packet = new Packet();
-			if(Utils.receiveMap.get(0)!=null) {
-				sequence = Utils.receiveMap.get(0).getHeader().getSequence()+1;
+			if(Utils.lastPacket!=null) {
+				sequence = Utils.lastPacket.getHeader().getSequence()+1;
 			}
 			packet.setHeader(seq++, sequence, type);
 			DatagramPacket packet2 = utils.getDatagramPacket(packet, ipAddress, port);
@@ -75,6 +77,10 @@ public class sender {
 		sender.connect(0);
 		Utils.START_TIME = System.currentTimeMillis(); 
 		Utils.delay = 1000;
+		if(Utils.fw==null) {
+			Utils.fw = new FileWriter("Sender_log.txt");
+			Utils.bw = new BufferedWriter(Utils.fw);
+		}
 		//ReceiveAck
 		ReceiverAck receiverAck = new ReceiverAck(sender.senderSocket,sender.ipAddress,sender.port);
 		Thread receiveThread = new Thread(receiverAck);
