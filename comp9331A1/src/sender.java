@@ -70,13 +70,36 @@ public class sender {
 	}
 	
 	public static void main(String[] args) {
-		
 		sender sender = new sender();
+		//receiver_host_ip
+		String r_host = args[0];
+		sender.ipAddress = r_host;
+		//receiver_port
+		int r_port = Integer.parseInt(args[1]);
+		sender.port = r_port;
+		//file.txt
+		String file_Name = args[2];
+		
+		//MWS
+		int byte_MWS = Integer.parseInt(args[3]);
+		 
+		//MSS
+		int MSS = Integer.parseInt(args[4]);
+		
+		int MWS =  byte_MWS/MSS;
+		//timeout
+		int timeout = Integer.parseInt(args[5]);
+		Utils.delay = timeout;
+		//pdrop
+		double pdrop  = Double.parseDouble(args[6]);
+		Utils.drop = pdrop;
+		//seed
+		int seed  = Integer.parseInt(args[7]);
 		try {
 		//Establish connection
 		sender.connect(0);
 		Utils.START_TIME = System.currentTimeMillis(); 
-		Utils.delay = 1000;
+		
 		if(Utils.fw==null) {
 			Utils.fw = new FileWriter("Sender_log.txt");
 			Utils.bw = new BufferedWriter(Utils.fw);
@@ -88,15 +111,15 @@ public class sender {
 		
 		// HandShake
 		sender.doHandshake();
-		File file = new File("text1.txt");
+		File file = new File(file_Name);
 		if(!file.exists()) {
 			System.out.println(file.getPath());
 			return;
 		}
 		//SendData;
-		Utils.drop = 0.5;
-		Utils.random= new Random();
-		SendFile sendFile = new SendFile(sender.senderSocket,file , 4, 10, sender.ipAddress, sender.port);
+		
+		Utils.random= new Random(seed);
+		SendFile sendFile = new SendFile(sender.senderSocket,file , MWS, MSS, sender.ipAddress, sender.port);
 		Thread sendThread = new Thread(sendFile);
 		sendThread.start();
 		

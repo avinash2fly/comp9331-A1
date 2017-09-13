@@ -49,6 +49,8 @@ public class Utils {
 	public static int AVERAGE_DELAY = 100;
 	public static int duplicateAck=0;
 	public static int reTransmitted = 0;
+	public static int fileSize = 0;
+	public static int og_packet_size=0;
 	
 	
 	public DatagramSocket getDatagramSocket(int timeout) throws SocketException {
@@ -70,6 +72,18 @@ public class Utils {
 		InetAddress IPAddress = InetAddress.getByName(address);
 		
 		DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, port);
+		return sendPacket;
+	}
+public DatagramPacket getDatagramPacket(Packet sendData, InetAddress address,int port) throws IOException {
+		
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ObjectOutputStream os = new ObjectOutputStream(outputStream);
+		os.writeObject(sendData);
+		byte[] data = outputStream.toByteArray();
+		//int port = Integer.parseInt("8080");
+		//InetAddress IPAddress = InetAddress.getByName(address);
+		
+		DatagramPacket sendPacket = new DatagramPacket(data, data.length, address, port);
 		return sendPacket;
 	}
 
@@ -96,8 +110,12 @@ public class Utils {
 			socket.send(packet);
 			long time_ellapsed = System.currentTimeMillis() - START_TIME;
 			String packetType = packet1.getHeader().getFlag().toString();
+			packet1.getHeader().setRepeat();
+			if(packet1.getHeader().getRepeat()==1) {
+				og_packet_size++;
+			}
 			//int bytesSent = packet1.getData().getDataByte().length;
-			standardPrint("send", time_ellapsed, packetType, packet1.getHeader().getSequence(),0,packet1.getHeader().getAck() );
+			standardPrint("snd", time_ellapsed, packetType, packet1.getHeader().getSequence(),0,packet1.getHeader().getAck() );
 			TimerTask task = new TimerTask() {
 		        public void run() {
 		           try {
@@ -135,8 +153,13 @@ public class Utils {
 	static public synchronized void standardPrint(String process, long time_ellapsed, String packetType, int sync_no, int bytesSent, int ack_no) throws IOException{
 		String timeF = String.format("%.3f", time_ellapsed/1000f);
 		String out = process + "\t\t" + timeF + "\t"+packetType+"\t"+sync_no+"\t"+bytesSent+"\t"+ack_no+'\n';
-		bw.write(out);
-		System.out.print(out);
+		try {
+			bw.write(out);
+			System.out.print(out);			
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
 		
 	}
 	
@@ -146,8 +169,14 @@ public class Utils {
 		Packet packet1  =  utils.getPacketByStream(packet);
 		int seq = packet1.getHeader().getSequence();
 		packet1.getHeader().setRepeat();
+		DatagramPacket packetx = utils.getDatagramPacket(packet1, packet.getAddress(),packet.getPort());
 		if(packet1.getHeader().getRepeat()>1) {
 			reTransmitted++;
+		}
+		else if(packet1.getHeader().getRepeat()==1) {
+			og_packet_size++;
+			fileSize= fileSize+packet1.getData().getDataByte().length;
+			System.out.println(packet1.getHeader().getSequence()+"----------------" + packet1.getHeader().getRepeat());
 		}
 		String process = "snd";
 		//if(senderMap.get(seq)==null) {
@@ -162,7 +191,7 @@ public class Utils {
 				standardPrint(process, time_ellapsed, packetType, packet1.getHeader().getSequence(),bytesSent,packet1.getHeader().getAck() );
 			}
 			else {
-				if(randomx<(2*AVERAGE_DELAY)) {
+				if(randomx<(2*drop)) {
 					Thread.sleep((int) (randomx * 2 * AVERAGE_DELAY));
 					delayCount++;
 				}
@@ -170,7 +199,7 @@ public class Utils {
 				String packetType = packet1.getHeader().getFlag().toString();
 				int bytesSent = packet1.getData().getDataByte().length;
 				standardPrint(process, time_ellapsed, packetType, packet1.getHeader().getSequence(),bytesSent,packet1.getHeader().getAck() );
-				socket.send(packet);
+				socket.send(packetx);
 				
 			}
 			
@@ -178,7 +207,7 @@ public class Utils {
 		        public void run() {
 		           try {
 		        	   if(senderMap.containsKey(seq))
-					sendPacket(socket, packet);
+					sendPacket(socket, packetx);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

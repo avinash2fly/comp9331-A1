@@ -134,8 +134,8 @@ public class SendFile implements Runnable{
 	}
 	private void closeLogFile() throws IOException {
 		// TODO Auto-generated method stub
-		Utils.bw.write("\nAmount of (original) Data Transferred (in bytes)" + "\n");
-		Utils.bw.write("Number of Data Segments Sent (excluding retransmissions)" + "\n");
+		Utils.bw.write("\nAmount of (original) Data Transferred (in bytes) : " + Utils.fileSize+"\n");
+		Utils.bw.write("Number of Data Segments Sent (excluding retransmissions) : " + Utils.og_packet_size+"\n");
 		Utils.bw.write("Number of (all) Packets Dropped (by the PLD module) : "+Utils.dropCount + "\n");
 		Utils.bw.write("Number of (all) Packets Delayed : " + Utils.delayCount + "\n");
 		Utils.bw.write("Number of Retransmitted Segments : " + Utils.reTransmitted + "\n");
